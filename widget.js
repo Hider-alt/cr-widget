@@ -116,7 +116,8 @@ async function addHeader(containerStack) {
     const nameText = accInfo.addText(accountData.name)
     nameText.font = titleFont;
 
-    let clanText = areUpdatesAvailable ? accInfo.addText(updateAvailableText) : accInfo.addText(accountData.clanName || "")
+    // Clan Text -> If updates available, add update text, else if clan name exists, add clan name
+    let clanText = areUpdatesAvailable ? accInfo.addText(updateAvailableText) : (accountData.clanName ? accInfo.addText(accountData.clanName) : "");
     clanText.font = subtitleFont;
     clanText.textColor = Color.lightGray();
 
