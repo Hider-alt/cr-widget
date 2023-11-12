@@ -298,11 +298,11 @@ async function drawUpcomingChest(chest, drawContext, x, y, size, big = false) {
 
     pill.addRoundedRect(new Rect(pillX, pillY, pillWidth, pillHeight), borderRadius, borderRadius);
     drawContext.addPath(pill);
-    drawContext.setFillColor(Device.isUsingDarkAppearance() ? Color.white() : Color.darkGray());
+    drawContext.setFillColor(new Color("#454245CC"));
     drawContext.fillPath();
 
     const fontSize = 36;
-    drawContext.setTextColor(Device.isUsingDarkAppearance() ? Color.black() : Color.white());
+    drawContext.setTextColor(Color.white());
     drawContext.setFont(Font.mediumRoundedSystemFont(fontSize));
 
     const fontWidth = fontSize / 1.55;
