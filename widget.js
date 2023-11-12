@@ -151,7 +151,7 @@ function addStats(containerStack) {
         },
         {
             title: battlesText,
-            value: accountData.battles.toLocaleString(Device.locale().replace("_", "-"))
+            value: accountData.battles.toLocaleString(Device.locale().replaceAll("_", "-"))
         },
         {
             title: recordText,
@@ -204,7 +204,10 @@ async function addDeck(containerStack) {
     cardsRow.size = new Size(rowWidth, cardHeight);
 
     for (const [index, card] of accountData.deck.entries()) {
-        const cardImg = await getAsset(`cards-150/${card.name.toLowerCase().replace(" ", "-")}.png`, card.name);
+        const cardImg = await getAsset(
+            `cards-150/${card.name.toLowerCase().replaceAll(" ", "-").replaceAll(".", "")}.png`,
+            card.name
+        );
         cardsRow.drawImageInRect(cardImg, new Rect(index * (cardWidth + 2), 0, cardWidth, cardHeight));
     }
 
@@ -278,7 +281,7 @@ async function addUpcomingChests(containerStack, chests, chestsPerRow = 6) {
 
 async function drawUpcomingChest(chest, drawContext, x, y, size, big = false) {
     // Chest name -> lowercase, no spaces, truncate at "chest", trim
-    const chestName = chest.name.toLowerCase().replace(/ /g, "").split("chest")[0].trim();
+    const chestName = chest.name.toLowerCase().replaceAll(" ", "").split("chest")[0].trim();
     const chestImg = await getAsset(
         `chests/chest-${chestName}.png`,
         chest.name,
