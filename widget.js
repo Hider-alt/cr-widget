@@ -69,7 +69,8 @@ await widget.presentLarge();
 async function buildLayout(widget) {
     switch (WIDGET_FAMILY) {
         case 'medium':
-            widget.setPadding(10, 0, 10, 0)
+            widget.setPadding(10, 0, 10, 0);
+
             await addHeader(widget);
             widget.addSpacer();
 
@@ -77,11 +78,14 @@ async function buildLayout(widget) {
 
             break;
         case 'large':
-            widget.setPadding(15, 0, 10, 0)
+            widget.setPadding(15, 0, 10, 0);
+
             await addHeader(widget);
             widget.addSpacer();
+
             addStats(widget)
             widget.addSpacer();
+
             await addDeck(widget);
             widget.addSpacer();
 
@@ -112,7 +116,7 @@ async function addHeader(containerStack) {
     const nameText = accInfo.addText(accountData.name)
     nameText.font = titleFont;
 
-    let clanText = accountData.clanName ? accInfo.addText(areUpdatesAvailable ? updateAvailableText : accountData.clanName) : "";
+    let clanText = areUpdatesAvailable ? accInfo.addText(updateAvailableText) : accInfo.addText(accountData.clanName || "")
     clanText.font = subtitleFont;
     clanText.textColor = Color.lightGray();
 
@@ -388,8 +392,13 @@ async function supercellAPIRequest(route, method = 'GET') {
         if (res.hasOwnProperty('message')) {
             switch (res['reason']) {
                 case 'accessDenied.invalidIp':
-                    console.log("Set '45.79.218.79' in the ALLOWED IP ADDRESSES section");
+                    console.log("Set '45.79.218.79' in the ALLOWED IP ADDRESSES section in https://developer.clashroyale.com/#/account");
                     break;
+                case 'accessDenied':
+                    console.log("Invalid token");
+                    break;
+                default:
+                    console.log(res['message']);
             }
         }
     } catch (err) {
