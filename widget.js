@@ -21,7 +21,7 @@
 const API_TOKEN = ''
 
 // Set your tag here or in widget args
-let ACCOUNT_TAG = '#U0QGJ2J9'
+let ACCOUNT_TAG = '#'
 
 const battlesText = 'Battles';
 const winText = 'Win';
@@ -393,21 +393,30 @@ async function supercellAPIRequest(route, method = 'GET') {
     let res;
     try {
         res = await req.loadJSON();
-        if (res.hasOwnProperty('message')) {
+        if (res.hasOwnProperty('reason')) {
+            let text;
             switch (res['reason']) {
                 case 'accessDenied.invalidIp':
-                    console.log("Set '45.79.218.79' in the ALLOWED IP ADDRESSES section in https://developer.clashroyale.com/#/account");
+                    text = "Set '45.79.218.79' in the ALLOWED IP ADDRESSES section in https://developer.clashroyale.com/#/account";
                     break;
                 case 'accessDenied':
-                    console.log("Invalid token");
+                    text = "Invalid token";
+                    break;
+                case 'notFound':
+                    text = "Player not found";
                     break;
                 default:
-                    console.log(res['message']);
+                    text = res['reason'];
             }
+
+            console.log(text);
+            throw new Error(text);
         }
     } catch (err) {
         console.log("Error in: " + url);
         console.log(err);
+
+        throw new Error(err);
     }
 
     return res;
