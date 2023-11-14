@@ -50,7 +50,7 @@ const subtitleFont = Font.mediumRoundedSystemFont(WIDGET_FAMILY === 'large' ? 10
 const areUpdatesAvailable = await checkRepoUpdates();
 
 if (areUpdatesAvailable)
-    widget.url = 'https://github.com/Hider-alt/covid-widget/releases/latest';
+    widget.url = 'https://github.com/Hider-alt/cr-widget/blob/main/docs/update.md';
 else
     widget.url = `https://royaleapi.com/player/${ACCOUNT_TAG.replace('#', '')}`;
 
