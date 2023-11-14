@@ -204,10 +204,15 @@ async function addDeck(containerStack) {
     cardsRow.size = new Size(rowWidth, cardHeight);
 
     for (const [index, card] of accountData.deck.entries()) {
-        const cardImg = await getAsset(
+        let cardImg = await getAsset(
             `cards-150/${card.name.toLowerCase().replaceAll(" ", "-").replaceAll(".", "")}.png`,
             card.name
         );
+
+        if (!cardImg) {
+            cardImg = await getAsset('cards/card-legendary-unknown.png', 'unknown');
+        }
+
         cardsRow.drawImageInRect(cardImg, new Rect(index * (cardWidth + 2), 0, cardWidth, cardHeight));
     }
 
@@ -347,7 +352,11 @@ async function getAsset(assetUrl, name, baseUrl = "https://royaleapi.github.io/c
         image = await getImage(name);
     else {
         const imageRequest = new Request(baseUrl + assetUrl);
-        image = await imageRequest.loadImage();
+        try {
+            image = await imageRequest.loadImage();
+        } catch (err) {
+            return null;
+        }
         saveImage(name, image);
     }
 
