@@ -3,8 +3,11 @@
  *****************************/
 
 /*****************************
+ * How to setup: Look on the repo https://github.com/Hider-alt/cr-widget/blob/main/README.md
+
  * Version History:
  * v1.0 -> Initial release
+ * v1.1 -> Changes in chest display & Minor fixes (some chests caused the widget to crash)
 
  * Credits: RoyaleAPI
 
@@ -35,7 +38,7 @@ const updateAvailableText = 'New update available! Click the widget';
  * Setup
  *****************************/
 
-const VERSION = 'v1.0';
+const VERSION = 'v1.1';
 const BASE_API_URL = "https://proxy.royaleapi.dev/v1";
 ACCOUNT_TAG = args.widgetParameter || ACCOUNT_TAG || '';
 const WIDGET_FAMILY = config.widgetFamily || 'large';
@@ -67,6 +70,8 @@ await widget.presentLarge();
  *****************************/
 
 async function buildLayout(widget) {
+    let N, chests;
+
     switch (WIDGET_FAMILY) {
         case 'medium':
             widget.setPadding(10, 0, 10, 0);
@@ -74,7 +79,9 @@ async function buildLayout(widget) {
             await addHeader(widget);
             widget.addSpacer();
 
-            await addUpcomingChests(widget, accountData.upcomingChests.slice(0, 6));
+            N = 6;
+            chests = getNChests(accountData.upcomingChests, N);
+            await addUpcomingChests(widget, chests);
 
             break;
         case 'large':
@@ -89,8 +96,10 @@ async function buildLayout(widget) {
             await addDeck(widget);
             widget.addSpacer();
 
-            // Get first 12 chests
-            await addUpcomingChests(widget, accountData.upcomingChests.slice(0, 12));
+            // Get first N chests (reduce N if widget crashes) (min 4 chests)
+            N = 4
+            chests = getNChests(accountData.upcomingChests, N);
+            await addUpcomingChests(widget, chests, Math.max(4, N / 2));
 
             break;
         default:
@@ -208,10 +217,6 @@ async function addDeck(containerStack) {
             `cards-150/${card.name.toLowerCase().replaceAll(" ", "-").replaceAll(".", "")}.png`,
             card.name
         );
-
-        if (!cardImg) {
-            cardImg = await getAsset('cards/card-legendary-unknown.png', 'unknown');
-        }
 
         cardsRow.drawImageInRect(cardImg, new Rect(index * (cardWidth + 2), 0, cardWidth, cardHeight));
     }
@@ -346,17 +351,28 @@ async function getExpImage() {
 }
 
 
-async function getAsset(assetUrl, name, baseUrl = "https://royaleapi.github.io/cr-api-assets/") {
+async function getAsset(assetUrl, name, baseUrl = "https://hider-alt.github.io/cr-api-assets/") {
     let image;
-    if (imageExists(name))
+
+    if (imageExists(name)) {
         image = await getImage(name);
+
+        // Sometimes the image is corrupted, in that case, delete it and fetch it again
+        if (!image) {
+            deleteAsset(name);
+            return await getAsset(assetUrl, name, baseUrl);
+        }
+    }
     else {
         const imageRequest = new Request(baseUrl + assetUrl);
+
         try {
             image = await imageRequest.loadImage();
         } catch (err) {
-            return null;
+            // If image not found, return unknown image
+            return getAsset("cards/card-legendary-unknown.png", "unknown");
         }
+
         saveImage(name, image);
     }
 
@@ -435,6 +451,17 @@ async function supercellAPIRequest(route, method = 'GET') {
  * Utils Functions
  *****************************/
 
+function getNChests(chests, n) {
+    // Half of N chests will be shown from 0 to N/2, the other half from -6 to (-6 + N/2)
+    // (If n > N/2 + 6, show from 0 to N)
+
+    if (n > chests.length / 2 + 6)
+        return chests.slice(0, n);
+    else
+        return chests.slice(0, n / 2).concat(chests.slice(-6, -6 + n / 2));
+}
+
+
 function imageExists(name) {
     return fm.fileExists(fm.joinPath(fm.joinPath(fm.documentsDirectory(), "cr-widget"), name + ".png"));
 }
@@ -458,6 +485,11 @@ function saveImage(name, image) {
 
     const path = fm.joinPath(base_path, name + ".png")
     fm.writeImage(path, image)
+}
+
+function deleteAsset(name) {
+    const path = fm.joinPath(fm.joinPath(fm.documentsDirectory(), "cr-widget"), name + ".png");
+    fm.remove(path);
 }
 
 async function checkRepoUpdates() {
